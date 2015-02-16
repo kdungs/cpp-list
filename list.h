@@ -42,7 +42,6 @@ auto join(ListPtr<A> left, ListPtr<A> right) -> ListPtr<A> {
   return cons<A>(left->data, join<A>(left->tail, right));
 }
 
-
 // usually not a Haskell function but useful for printing etc.
 // apply :: (a -> ()) -> [a] -> ()
 template <Function FN, Type A>
