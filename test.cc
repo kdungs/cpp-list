@@ -2,6 +2,12 @@
 
 #include <iostream>
 
+template <typename T>
+auto printList(ListPtr<T> head) -> void {
+  apply([](const T& elem) { std::cout << elem << ' '; }, head);
+  std::cout << '\n';
+}
+
 int main() {
   auto l = cons(4, cons(5, cons(6)));
   l = append(l, 7);
@@ -10,12 +16,9 @@ int main() {
   auto sum =
       foldl([](const double& acc, const double& x) { return acc + x; }, 0.0, r);
 
-  apply([](const int& elem) { std::cout << elem << ' '; }, l);
-  std::cout << '\n';
-  apply([](const int& elem) { std::cout << elem << ' '; }, q);
-  std::cout << '\n';
-  apply([](const double& elem) { std::cout << elem << ' '; }, r);
-  std::cout << '\n';
+  printList(l);
+  printList(q);
+  printList(r);
 
   std::cout << sum << '\n';
   std::cout << size(r) << '\n';
