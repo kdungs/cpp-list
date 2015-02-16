@@ -72,6 +72,15 @@ auto foldl(const FN& f, A&& acc, ListPtr<B> head) -> A {
   return foldl<FN, A, B>(f, f(std::forward<A>(acc), head->data), head->tail);
 }
 
+// foldr :: (a -> b -> b) -> b -> [a] -> b
+template <Function FN, Type A, Type B>
+auto foldr(const FN& f, B&& acc, ListPtr<A> head) -> B {
+  if (!head) {
+    return std::forward<B>(acc);
+  }
+  return f(head->data, foldr<FN, A, B>(f, std::forward<B>(acc), head->tail));
+}
+
 // size :: [a] -> std::size_t
 template <Type A>
 auto size(ListPtr<A> head) -> std::size_t {
@@ -85,3 +94,8 @@ template <Type A>
 auto empty(ListPtr<A> head) -> bool {
   return head == nullptr;
 }
+
+// reverse :: [a] -> [a]
+//template <Type A>
+//auto reverse(ListPtr<A> head) -> ListPtr<A> {
+//}

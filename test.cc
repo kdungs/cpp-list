@@ -12,15 +12,24 @@ int main() {
   auto l = cons(4, cons(5, cons(6)));
   l = append(l, 7);
   auto q = join(l, l);
+  // auto p = reverse(q);
   auto r = fmap([](const int& x) { return 2.3 * x; }, l);
-  auto sum =
-      foldl([](const double& acc, const double& x) { return acc + x; }, 0.0, r);
+  auto lsum = foldl([](const double& acc, const double& x) {
+    std::cout << " +" << x << '\n';
+    return acc + x;
+  }, 0.0, r);
+  auto rsum = foldr([](const double& x, const double& acc) {
+    std::cout << " +" << x << '\n';
+    return x + acc;
+  }, 0.0, r);
 
   printList(l);
   printList(q);
+  // printList(p);
   printList(r);
 
-  std::cout << sum << '\n';
+  std::cout << lsum << '\n';
+  std::cout << rsum << '\n';
   std::cout << size(r) << '\n';
   if (empty(r)) {
     std::cout << "r is empty\n";
