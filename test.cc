@@ -9,19 +9,16 @@ auto printList(ListPtr<T> head) -> void {
 }
 
 int main() {
-  auto l = cons(1, cons(2, cons(3)));
+  auto l = makeList(1, 2, 3);
+  // auto l = makeList(1, 2, 3, 5.0); // will explode in your face
   l = append(l, 4);
   auto q = join(l, l);
   auto p = reverse(q);
   auto r = fmap([](const int& x) { return 2.3 * x; }, l);
-  auto lsum = foldl([](const double& acc, const double& x) {
-    std::cout << " +" << x << '\n';
-    return acc + x;
-  }, 0.0, r);
-  auto rsum = foldr([](const double& x, const double& acc) {
-    std::cout << " +" << x << '\n';
-    return x + acc;
-  }, 0.0, r);
+  auto lsum =
+      foldl([](const double& acc, const double& x) { return acc + x; }, 0.0, r);
+  auto rsum =
+      foldr([](const double& x, const double& acc) { return x + acc; }, 0.0, r);
 
   printList(l);
   printList(q);

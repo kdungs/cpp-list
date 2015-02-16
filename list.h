@@ -24,6 +24,17 @@ auto cons(A data, Args&&... args) -> ListPtr<A> {
                                          std::forward<Args>(args)...);
 }
 
+// Variadic helper function to create lists without having to write
+// cons(cons(...)) all the time.
+template <Type A>
+auto makeList(A&& data) -> ListPtr<A> {
+  return cons<A>(std::forward<A>(data));
+}
+template <Type A, typename... Args>
+auto makeList(A&& data, Args&&... args) -> ListPtr<A> {
+  return cons<A>(std::forward<A>(data), makeList(std::forward<Args>(args)...));
+}
+
 // append :: [a] -> a -> [a]
 template <Type A>
 auto append(ListPtr<A> head, A&& data) -> ListPtr<A> {
@@ -83,9 +94,8 @@ auto foldr(const FN& f, B&& acc, ListPtr<A> head) -> B {
 // size :: [a] -> std::size_t
 template <Type A>
 auto size(ListPtr<A> head) -> std::size_t {
-  return foldl([](const std::size_t& acc, const A&) {
-    return acc + 1;
-  }, 0u, head);
+  return foldl([](const std::size_t& acc, const A&) { return acc + 1; }, 0u,
+               head);
 }
 
 // empty :: [a] -> bool
