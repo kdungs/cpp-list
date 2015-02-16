@@ -96,6 +96,11 @@ auto empty(ListPtr<A> head) -> bool {
 }
 
 // reverse :: [a] -> [a]
-//template <Type A>
-//auto reverse(ListPtr<A> head) -> ListPtr<A> {
-//}
+template <Type A>
+auto reverse(ListPtr<A> head) -> ListPtr<A> {
+  if (!head->tail) {
+    return head;
+  }
+  auto f = [](ListPtr<A> acc, const A& data) { return cons<A>(data, acc); };
+  return foldl<decltype(f), ListPtr<A>, A>(f, nullptr, head);
+}
