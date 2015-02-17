@@ -35,9 +35,9 @@ Functionality loosely follows all the nice stuff you find in Haskell ([Prelude](
 
 ## To Do
 
- [] Implement more functionality
- [] Write actual (unit) tests
- [] More documentation
+ * Implement more functionality
+ * Write actual (unit) tests
+ * More documentation
 
 
 ## Contact
