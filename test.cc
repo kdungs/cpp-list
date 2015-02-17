@@ -14,7 +14,8 @@ int main() {
   l = append(l, 4);
   auto q = join(l, l);
   auto p = reverse(q);
-  auto r = fmap([](int x) { return 2.3 * x; }, l);
+  auto r = map([](int x) { return 2.3 * x; }, l);
+  auto filtered = filter([](int x) { return x % 2 == 0; }, l);
   auto zipped =
       zipWith([](int left, double right) { return left > right; }, l, r);
 
@@ -22,6 +23,7 @@ int main() {
   printList(q);
   printList(p);
   printList(r);
+  printList(filtered);
   printList(zipped);
   
   auto lsum = foldl([](double acc, double x) { return acc + x; }, 0.0, r);
@@ -38,10 +40,25 @@ int main() {
   std::cout << "ldiv = " << ldiv << '\n';
   std::cout << "rdiv = " << rdiv << '\n';
 
-  std::cout << "size(r) = " << size(r) << '\n';
-  if (empty(r)) {
+  std::cout << "length(r) = " << length(r) << '\n';
+  if (null(r)) {
     std::cout << "r is empty\n";
   } else {
     std::cout << "r is not empty\n";
   }
+
+  std::cout << "head(r) = " << head(r) << '\n';
+  std::cout << "last(r) = " << last(r) << '\n';
+  std::cout << "tail(r) = ";
+  printList(tail(r));
+  std::cout << "init(r) = ";
+  printList(init(r));
+
+  auto ls = makeList(makeList(1, 2, 3), makeList(4, 5, 6));
+  auto lc = concat(ls);
+  printList(lc);
+
+  auto duplicate = [](int x) { return cons<int>(x, cons<int>(x)); };
+  auto dl = concatMap(duplicate, l);
+  printList(dl);
 }

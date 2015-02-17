@@ -4,8 +4,9 @@
 #include <memory>
 
 // Definitions for cleaner code (see Stephanov)
-#define Function typename
 #define Type typename
+#define Function typename
+#define Predicate typename
 
 template <Type A>
 struct List {
@@ -26,7 +27,8 @@ auto cons(A data, Args&&... args) -> ListPtr<A> {
 }
 
 // Variadic helper function to create lists without having to write
-// cons(cons(...)) all the time.
+// cons(cons(...)) all the time. Equivalent to [1, 2, 3] vs 1 : 2 : 3 : () in
+// Haskell.
 template <Type A>
 auto makeList(A&& data) -> ListPtr<A> {
   return cons<A>(std::forward<A>(data));
@@ -34,6 +36,19 @@ auto makeList(A&& data) -> ListPtr<A> {
 template <Type A, typename... Args>
 auto makeList(A&& data, Args&&... args) -> ListPtr<A> {
   return cons<A>(std::forward<A>(data), makeList(std::forward<Args>(args)...));
+}
+
+// ---------------
+// List operations
+// ---------------
+
+// map :: (a -> b) -> [a] -> [b]
+template <Function FN, Type A, Type B = typename std::result_of<FN(A)>::type>
+auto map(const FN& f, const ListPtr<A>& head) -> ListPtr<B> {
+  if (!head) {
+    return nullptr;
+  }
+  return cons<B>(f(head->data), map<FN, A, B>(f, head->tail));
 }
 
 // append :: [a] -> a -> [a]
@@ -45,7 +60,7 @@ auto append(const ListPtr<A>& head, A&& data) -> ListPtr<A> {
   return cons<A>(head->data, append<A>(head->tail, std::forward<A>(data)));
 }
 
-// join :: [a] -> [a] -> [a]
+// (++) :: [a] -> [a] -> [a]
 template <Type A>
 auto join(const ListPtr<A>& left, const ListPtr<A>& right) -> ListPtr<A> {
   if (!left) {
@@ -54,25 +69,82 @@ auto join(const ListPtr<A>& left, const ListPtr<A>& right) -> ListPtr<A> {
   return cons<A>(left->data, join<A>(left->tail, right));
 }
 
-// usually not a Haskell function but useful for printing etc.
-// apply :: (a -> ()) -> [a] -> ()
-template <Function FN, Type A>
-auto apply(const FN& f, const ListPtr<A>& head) -> void {
-  if (!head) {
-    return;
-  }
-  f(head->data);
-  apply<FN, A>(f, head->tail);
-}
-
-// fmap :: (a -> b) -> [a] -> [b]
-template <Function FN, Type A, Type B = typename std::result_of<FN(A)>::type>
-auto fmap(const FN& f, const ListPtr<A>& head) -> ListPtr<B> {
+// filter :: (a -> Bool) -> [a] -> [a]
+template <Predicate PR, Type A>
+auto filter(const PR& p, const ListPtr<A>& head) -> ListPtr<A> {
   if (!head) {
     return nullptr;
   }
-  return cons<B>(f(head->data), fmap<FN, A, B>(f, head->tail));
+  auto tail = filter<PR, A>(p, head->tail);
+  if (p(head->data)) {
+    return cons<A>(head->data, tail);
+  }
+  return tail;
 }
+
+// head :: [a] -> a
+template <Type A>
+auto head(const ListPtr<A>& head) -> A {
+  assert(head && "List can't be empty.");
+  return head->data;
+}
+
+// last :: [a] -> a
+template <Type A>
+auto last(const ListPtr<A>& head) -> A {
+  assert(head && "List can't be empty.");
+  if (!head->tail) {
+    return head->data;
+  }
+  return last(head->tail);
+}
+
+// tail :: [a] -> [a]
+template <Type A>
+auto tail(const ListPtr<A>& head) -> ListPtr<A> {
+  assert(head && "List can't be empty.");
+  return head->tail;
+}
+
+// init :: [a] -> [a]
+template <Type A>
+auto init(const ListPtr<A>& head) -> ListPtr<A> {
+  assert(head && "List can't be empty.");
+  if (!head->tail) {
+    return nullptr;
+  }
+  return cons<A>(head->data, init(head->tail));
+}
+
+// null :: [a] -> Bool
+template <Type A>
+auto null(const ListPtr<A>& head) -> bool {
+  return head == nullptr;
+}
+
+// length :: [a] -> Int
+template <Type A>
+auto length(const ListPtr<A>& head) -> std::size_t {
+  return foldl([](const std::size_t& acc, const A&) { return acc + 1; }, 0u,
+               head);
+}
+
+// (!!) :: [a] -> Int -> a
+template <Type A>
+auto at(const ListPtr<A>& head, std::size_t index) -> A {
+  assert(head &&
+         "List can't be empty and index must be smaller than size of list.");
+  if (index == 0) {
+    return head->data;
+  }
+  return at(head, index - 1);
+}
+
+// reverse uses fold and is thus defined later on
+
+// ----------------------
+// Reducing lists (folds)
+// ----------------------
 
 // foldl :: (a -> b -> a) -> a -> [b] -> a
 template <Function FN, Type A, Type B>
@@ -109,28 +181,30 @@ auto foldr1(const FN& f, const ListPtr<A>& head) -> A {
   return f(head->data, foldr1<FN, A>(f, head->tail));
 }
 
-// size :: [a] -> std::size_t
+// -------------
+// Special folds
+// -------------
+
+// concat :: [[a]] -> [a]
 template <Type A>
-auto size(const ListPtr<A>& head) -> std::size_t {
-  return foldl([](const std::size_t& acc, const A&) { return acc + 1; }, 0u,
-               head);
+auto concat(const ListPtr<ListPtr<A>>& head) -> ListPtr<A> {
+  auto _concat = [](const ListPtr<A>& acc, const ListPtr<A>& list) {
+    return join<A>(acc, list);
+  };
+  return foldl<decltype(_concat), ListPtr<A>, ListPtr<A>>(_concat, nullptr,
+                                                          head);
 }
 
-// empty :: [a] -> bool
-template <Type A>
-auto empty(const ListPtr<A>& head) -> bool {
-  return head == nullptr;
+// concatMap :: (a -> [b]) -> [a] -> [b]
+template <Function FN, Type A,
+          Type ListB = typename std::result_of<FN(A)>::type>
+auto concatMap(const FN& f, const ListPtr<A>& head) -> ListB {
+  return concat(map(f, head));
 }
 
-// reverse :: [a] -> [a]
-template <Type A>
-auto reverse(const ListPtr<A>& head) -> ListPtr<A> {
-  if (!head->tail) {
-    return head;
-  }
-  auto f = [](ListPtr<A> acc, const A& data) { return cons<A>(data, acc); };
-  return foldl<decltype(f), ListPtr<A>, A>(f, nullptr, head);
-}
+// ---------------------------
+// Zipping and unzipping lists
+// ---------------------------
 
 // zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
 template <Function FN, Type A, Type B,
@@ -142,4 +216,29 @@ auto zipWith(const FN& f, const ListPtr<A>& left, const ListPtr<B>& right)
   }
   return cons<C>(f(left->data, right->data),
                  zipWith<FN, A, B, C>(f, left->tail, right->tail));
+}
+
+// -----
+// Other
+// -----
+
+// reverse :: [a] -> [a]
+template <Type A>
+auto reverse(const ListPtr<A>& head) -> ListPtr<A> {
+  if (!head->tail) {
+    return head;
+  }
+  auto f = [](ListPtr<A> acc, const A& data) { return cons<A>(data, acc); };
+  return foldl<decltype(f), ListPtr<A>, A>(f, nullptr, head);
+}
+
+// usually not a Haskell function but useful for printing etc.
+// apply :: (a -> ()) -> [a] -> ()
+template <Function FN, Type A>
+auto apply(const FN& f, const ListPtr<A>& head) -> void {
+  if (!head) {
+    return;
+  }
+  f(head->data);
+  apply<FN, A>(f, head->tail);
 }
