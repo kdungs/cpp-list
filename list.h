@@ -113,3 +113,15 @@ auto reverse(const ListPtr<A>& head) -> ListPtr<A> {
   auto f = [](ListPtr<A> acc, const A& data) { return cons<A>(data, acc); };
   return foldl<decltype(f), ListPtr<A>, A>(f, nullptr, head);
 }
+
+// zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+template <Function FN, Type A, Type B,
+          Type C = typename std::result_of<FN(A, B)>::type>
+auto zipWith(const FN& f, const ListPtr<A>& left, const ListPtr<B>& right)
+    -> ListPtr<C> {
+  if (!left || !right) {
+    return nullptr;
+  }
+  return cons<C>(f(left->data, right->data),
+                 zipWith<FN, A, B, C>(f, left->tail, right->tail));
+}

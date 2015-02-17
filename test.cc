@@ -14,16 +14,17 @@ int main() {
   l = append(l, 4);
   auto q = join(l, l);
   auto p = reverse(q);
-  auto r = fmap([](const int& x) { return 2.3 * x; }, l);
-  auto lsum =
-      foldl([](const double& acc, const double& x) { return acc + x; }, 0.0, r);
-  auto rsum =
-      foldr([](const double& x, const double& acc) { return x + acc; }, 0.0, r);
+  auto r = fmap([](int x) { return 2.3 * x; }, l);
+  auto lsum = foldl([](double acc, double x) { return acc + x; }, 0.0, r);
+  auto rsum = foldr([](double x, double acc) { return x + acc; }, 0.0, r);
+  auto zipped =
+      zipWith([](int left, double right) { return left > right; }, l, r);
 
   printList(l);
   printList(q);
   printList(p);
   printList(r);
+  printList(zipped);
 
   std::cout << lsum << '\n';
   std::cout << rsum << '\n';
