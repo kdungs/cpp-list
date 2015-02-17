@@ -33,4 +33,12 @@ Functionality loosely follows all the nice stuff you find in Haskell ([Prelude](
  * Other
   * `apply` _does not exist in Haskell..._
 
- More functions will follow. If you have any questions or suggestions feel free to write an issue report.
+## To Do
+
+ [] Implement more functionality
+ [] Write actual (unit) tests
+ [] More documentation
+
+
+## Contact
+If you have any questions or suggestions feel free to write an issue report. You can also send me an email to kevin at my domain.
