@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <memory>
 
 // Definitions for cleaner code (see Stephanov)
@@ -82,6 +83,13 @@ auto foldl(const FN& f, A&& acc, const ListPtr<B>& head) -> A {
   return foldl<FN, A, B>(f, f(std::forward<A>(acc), head->data), head->tail);
 }
 
+// foldl1 :: (a -> a -> a) -> [a] -> a
+template <Function FN, Type A>
+auto foldl1(const FN& f, const ListPtr<A>& head) -> A {
+  assert(head && "List can't be empty.");
+  return foldl<FN, const A&, A>(f, head->data, head->tail);
+}
+
 // foldr :: (a -> b -> b) -> b -> [a] -> b
 template <Function FN, Type A, Type B>
 auto foldr(const FN& f, B&& acc, const ListPtr<A>& head) -> B {
@@ -89,6 +97,16 @@ auto foldr(const FN& f, B&& acc, const ListPtr<A>& head) -> B {
     return std::forward<B>(acc);
   }
   return f(head->data, foldr<FN, A, B>(f, std::forward<B>(acc), head->tail));
+}
+
+// foldr1 :: (a -> a -> a) -> [a] -> a
+template <Function FN, Type A>
+auto foldr1(const FN& f, const ListPtr<A>& head) -> A {
+  assert(head && "List can't be empty.");
+  if (!head->tail) {
+    return head->data;
+  }
+  return f(head->data, foldr1<FN, A>(f, head->tail));
 }
 
 // size :: [a] -> std::size_t
