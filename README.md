@@ -38,6 +38,7 @@ Functionality loosely follows all the nice stuff you find in Haskell ([Prelude](
  * Implement more functionality
  * Write actual (unit) tests
  * More documentation
+ * Performance?!
 
 
 ## Contact
