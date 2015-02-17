@@ -1,6 +1,7 @@
 #include "list.h"
 
 #include <iostream>
+#include <utility>
 
 template <typename T>
 auto printList(ListPtr<T> head) -> void {
@@ -61,4 +62,25 @@ int main() {
   auto duplicate = [](int x) { return cons<int>(x, cons<int>(x)); };
   auto dl = concatMap(duplicate, l);
   printList(dl);
+
+  auto lz = zip(q, r);
+  apply([](const std::tuple<int, double>& tup) {
+    std::cout << std::get<0>(tup) << ',' << std::get<1>(tup) << '\n';
+  }, lz);
+  auto lz3 = zip3(q, r, r);
+  apply([](const std::tuple<int, double, double>& tup) {
+    std::cout << std::get<0>(tup) << ',' << std::get<1>(tup) << ','
+              << std::get<2>(tup) << '\n';
+  }, lz3);
+
+  ListPtr<int> lu0;
+  ListPtr<double> lu1;
+  std::tie(lu0, lu1) = unzip(lz);
+  printList(lu0);
+  printList(lu1);
+
+  ListPtr<int> lu30;
+  ListPtr<double> lu31, lu32;
+  std::tie(lu30, lu31, lu32) = unzip3(lz3);
+  printList(lu30);
 }

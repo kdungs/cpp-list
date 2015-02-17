@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <memory>
+#include <utility>
 
 // Definitions for cleaner code (see Stephanov)
 #define Type typename
@@ -206,6 +207,27 @@ auto concatMap(const FN& f, const ListPtr<A>& head) -> ListB {
 // Zipping and unzipping lists
 // ---------------------------
 
+// zip :: [a] -> [b] -> [(a, b)]
+template <Type A, Type B, typename TUP = std::tuple<A, B>>
+auto zip(const ListPtr<A>& left, const ListPtr<B>& right) -> ListPtr<TUP> {
+  if (!left || !right) {
+    return nullptr;
+  }
+  return cons<TUP>(std::make_tuple(left->data, right->data),
+                   zip<A, B, TUP>(left->tail, right->tail));
+}
+
+// zip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
+template <Type A, Type B, Type C, typename TUP = std::tuple<A, B, C>>
+auto zip3(const ListPtr<A>& left, const ListPtr<B>& middle,
+          const ListPtr<C>& right) -> ListPtr<TUP> {
+  if (!left || !middle || !right) {
+    return nullptr;
+  }
+  return cons<TUP>(std::make_tuple(left->data, middle->data, right->data),
+                   zip3<A, B, C, TUP>(left->tail, middle->tail, right->tail));
+}
+
 // zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
 template <Function FN, Type A, Type B,
           Type C = typename std::result_of<FN(A, B)>::type>
@@ -216,6 +238,47 @@ auto zipWith(const FN& f, const ListPtr<A>& left, const ListPtr<B>& right)
   }
   return cons<C>(f(left->data, right->data),
                  zipWith<FN, A, B, C>(f, left->tail, right->tail));
+}
+
+// zipWith3 :: (a -> b -> c -> d) -> [a] -> [b] -> [c] -> [d]
+template <Function FN, Type A, Type B, Type C,
+          Type D = typename std::result_of<FN(A, B, C)>::type>
+auto zipWith3(const FN& f, const ListPtr<A>& left, const ListPtr<B>& middle,
+              const ListPtr<C>& right) -> ListPtr<D> {
+  if (!left || !middle || !right) {
+    return nullptr;
+  }
+  return cons<D>(
+      f(left->data, middle->data, right->data),
+      zipWith3<FN, A, B, C, D>(f, left->tail, middle->tail, right->tail));
+}
+
+// unzip :: [(a, b)] -> ([a], [b])
+template <typename TUP, Type A = typename std::tuple_element<0, TUP>::type,
+          Type B = typename std::tuple_element<1, TUP>::type,
+          typename LTUP = std::tuple<ListPtr<A>, ListPtr<B>>>
+auto unzip(const ListPtr<TUP>& head) -> LTUP {
+  if (!head) {
+    return LTUP{nullptr, nullptr};
+  }
+  auto rest = unzip<TUP, A, B, LTUP>(head->tail);
+  return LTUP{cons<A>(std::get<0>(head->data), std::get<0>(rest)),
+              cons<B>(std::get<1>(head->data), std::get<1>(rest))};
+}
+
+// unzip3 :: [(a, b, c)] -> ([a], [b], [c])
+template <typename TUP, Type A = typename std::tuple_element<0, TUP>::type,
+          Type B = typename std::tuple_element<1, TUP>::type,
+          Type C = typename std::tuple_element<2, TUP>::type,
+          typename LTUP = std::tuple<ListPtr<A>, ListPtr<B>, ListPtr<C>>>
+auto unzip3(const ListPtr<TUP>& head) -> LTUP {
+  if (!head) {
+    return LTUP{nullptr, nullptr, nullptr};
+  }
+  auto rest = unzip3<TUP, A, B, C, LTUP>(head->tail);
+  return LTUP{cons<A>(std::get<0>(head->data), std::get<0>(rest)),
+              cons<B>(std::get<1>(head->data), std::get<1>(rest)),
+              cons<C>(std::get<2>(head->data), std::get<2>(rest))};
 }
 
 // -----

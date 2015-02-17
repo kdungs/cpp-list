@@ -29,7 +29,12 @@ Functionality loosely follows all the nice stuff you find in Haskell ([Prelude](
   * `concat`
   * `concatMap`
  * Zipping and unzipping lists
+  * `zip`
+  * `zip3`
   * `zipWith`
+  * `zipWith3`
+  * `unzip`
+  * `unzip3`
  * Other
   * `apply` _does not exist in Haskell..._
 
