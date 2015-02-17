@@ -5,9 +5,9 @@ Functionality loosely follows all the nice stuff you find in Haskell ([Prelude](
 
  * `cons` (:)
  * `makeList` ([...])
- * `append` _does not exist in Haskell..._
+ * `append` _does not exist in Haskell in this form..._
  * `join` (++)
- * `apply`
+ * `apply` _does not exist in Haskell..._
  * `fmap`
  * `foldl`
  * `foldl1`
