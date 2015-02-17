@@ -37,7 +37,7 @@ auto makeList(A&& data, Args&&... args) -> ListPtr<A> {
 
 // append :: [a] -> a -> [a]
 template <Type A>
-auto append(ListPtr<A> head, A&& data) -> ListPtr<A> {
+auto append(const ListPtr<A>& head, A&& data) -> ListPtr<A> {
   if (!head) {
     return cons<A>(std::forward<A>(data));
   }
@@ -46,7 +46,7 @@ auto append(ListPtr<A> head, A&& data) -> ListPtr<A> {
 
 // join :: [a] -> [a] -> [a]
 template <Type A>
-auto join(ListPtr<A> left, ListPtr<A> right) -> ListPtr<A> {
+auto join(const ListPtr<A>& left, const ListPtr<A>& right) -> ListPtr<A> {
   if (!left) {
     return right;
   }
@@ -56,7 +56,7 @@ auto join(ListPtr<A> left, ListPtr<A> right) -> ListPtr<A> {
 // usually not a Haskell function but useful for printing etc.
 // apply :: (a -> ()) -> [a] -> ()
 template <Function FN, Type A>
-auto apply(const FN& f, ListPtr<A> head) -> void {
+auto apply(const FN& f, const ListPtr<A>& head) -> void {
   if (!head) {
     return;
   }
@@ -66,7 +66,7 @@ auto apply(const FN& f, ListPtr<A> head) -> void {
 
 // fmap :: (a -> b) -> [a] -> [b]
 template <Function FN, Type A, Type B = typename std::result_of<FN(A)>::type>
-auto fmap(const FN& f, ListPtr<A> head) -> ListPtr<B> {
+auto fmap(const FN& f, const ListPtr<A>& head) -> ListPtr<B> {
   if (!head) {
     return nullptr;
   }
@@ -75,7 +75,7 @@ auto fmap(const FN& f, ListPtr<A> head) -> ListPtr<B> {
 
 // foldl :: (a -> b -> a) -> a -> [b] -> a
 template <Function FN, Type A, Type B>
-auto foldl(const FN& f, A&& acc, ListPtr<B> head) -> A {
+auto foldl(const FN& f, A&& acc, const ListPtr<B>& head) -> A {
   if (!head) {
     return std::forward<A>(acc);
   }
@@ -84,7 +84,7 @@ auto foldl(const FN& f, A&& acc, ListPtr<B> head) -> A {
 
 // foldr :: (a -> b -> b) -> b -> [a] -> b
 template <Function FN, Type A, Type B>
-auto foldr(const FN& f, B&& acc, ListPtr<A> head) -> B {
+auto foldr(const FN& f, B&& acc, const ListPtr<A>& head) -> B {
   if (!head) {
     return std::forward<B>(acc);
   }
@@ -93,20 +93,20 @@ auto foldr(const FN& f, B&& acc, ListPtr<A> head) -> B {
 
 // size :: [a] -> std::size_t
 template <Type A>
-auto size(ListPtr<A> head) -> std::size_t {
+auto size(const ListPtr<A>& head) -> std::size_t {
   return foldl([](const std::size_t& acc, const A&) { return acc + 1; }, 0u,
                head);
 }
 
 // empty :: [a] -> bool
 template <Type A>
-auto empty(ListPtr<A> head) -> bool {
+auto empty(const ListPtr<A>& head) -> bool {
   return head == nullptr;
 }
 
 // reverse :: [a] -> [a]
 template <Type A>
-auto reverse(ListPtr<A> head) -> ListPtr<A> {
+auto reverse(const ListPtr<A>& head) -> ListPtr<A> {
   if (!head->tail) {
     return head;
   }
