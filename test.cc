@@ -26,7 +26,7 @@ int main() {
   printList(r);
   printList(filtered);
   printList(zipped);
-  
+
   auto lsum = foldl([](double acc, double x) { return acc + x; }, 0.0, r);
   auto lsum1 = foldl1([](double acc, double x) { return acc + x; }, r);
   auto rsum = foldr([](double x, double acc) { return x + acc; }, 0.0, r);
@@ -36,8 +36,8 @@ int main() {
   std::cout << "rsum = " << rsum << '\n';
   std::cout << "rsum1 = " << rsum1 << '\n';
 
-  auto ldiv = foldl([](double acc, double x) { return acc / x;}, 1.0, r);
-  auto rdiv = foldr([](double acc, double x) { return acc / x;}, 1.0, r);
+  auto ldiv = foldl([](double acc, double x) { return acc / x; }, 1.0, r);
+  auto rdiv = foldr([](double acc, double x) { return acc / x; }, 1.0, r);
   std::cout << "ldiv = " << ldiv << '\n';
   std::cout << "rdiv = " << rdiv << '\n';
 
@@ -64,14 +64,18 @@ int main() {
   printList(dl);
 
   auto lz = zip(q, r);
-  apply([](const std::tuple<int, double>& tup) {
-    std::cout << std::get<0>(tup) << ',' << std::get<1>(tup) << '\n';
-  }, lz);
+  apply(
+      [](const std::tuple<int, double>& tup) {
+        std::cout << std::get<0>(tup) << ',' << std::get<1>(tup) << '\n';
+      },
+      lz);
   auto lz3 = zip3(q, r, r);
-  apply([](const std::tuple<int, double, double>& tup) {
-    std::cout << std::get<0>(tup) << ',' << std::get<1>(tup) << ','
-              << std::get<2>(tup) << '\n';
-  }, lz3);
+  apply(
+      [](const std::tuple<int, double, double>& tup) {
+        std::cout << std::get<0>(tup) << ',' << std::get<1>(tup) << ','
+                  << std::get<2>(tup) << '\n';
+      },
+      lz3);
 
   ListPtr<int> lu0;
   ListPtr<double> lu1;
@@ -83,4 +87,10 @@ int main() {
   ListPtr<double> lu31, lu32;
   std::tie(lu30, lu31, lu32) = unzip3(lz3);
   printList(lu30);
+
+  auto _l = makeList(1, 2, 3, 4, 5, 6, 7, 8);
+  auto _r = head(map([](int x) { return x / 2; },
+                     filter([](int x) { return x % 2 == 0; }, _l)));
+  printList(_l);
+  std::cout << _r << '\n';
 }
